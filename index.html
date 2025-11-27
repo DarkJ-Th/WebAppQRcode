@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แอพสร้าง QR Code พร้อมเพย์</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .btn-icon {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-icon:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+            width: auto;
+            border-radius: 8px;
+        }
+        
+        .btn-install {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .btn-install:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+        }
+        
+        .qr-container {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        #qrcode {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #qrcode canvas {
+            display: block !important;
+            margin: 0 auto;
+        }
+        
+        #qrcode img {
+            display: none !important;
+        }
+        
+        .amount-display {
+            margin: 20px 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+        
+        .bank-list {
+            margin-top: 20px;
+        }
+        
+        .bank-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .bank-info h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .bank-info p {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .back-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 16px;
+            padding: 5px;
+        }
+        
+        .back-btn:hover {
+            opacity: 0.8;
+        }
+
+        .info-notice {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #065f46;
+        }
+
+        .install-notice {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #92400e;
+        }
+
+        .pwa-install-btn {
+            position: absolute;
+            top: 20px;
+            right: 70px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .pwa-install-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* สไตล์ไอคอนใหม่ */
+        .icon-settings {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        .icon-settings .gear {
+            width: 20px;
+            height: 20px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .icon-settings .gear:before {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 2px;
+            background: currentColor;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .icon-settings .gear:after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 12px;
+            background: currentColor;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .icon-settings .inner-gear {
+            width: 8px;
+            height: 8px;
+            border: 1px solid currentColor;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .icon-install {
+            width: 24px;
+            height: 24px;
+            position: relative;
+        }
+
+        .icon-install .phone {
+            width: 16px;
+            height: 20px;
+            border: 2px solid currentColor;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .icon-install .phone:before {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 1px;
+            background: currentColor;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .icon-install .phone:after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 1px;
+            background: currentColor;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .icon-install .download {
+            position: absolute;
+            bottom: -8px;
+            right: -8px;
+            width: 16px;
+            height: 16px;
+            background: #f59e0b;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-install .download:before {
+            content: '↓';
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .manual-install {
+            background: #e0f2fe;
+            border: 1px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .manual-install h3 {
+            color: #0369a1;
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .manual-install ol {
+            margin-left: 20px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .manual-install li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .manual-install strong {
+            color: #0369a1;
+        }
+
+        .platform-section {
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #0ea5e9;
+        }
+
+        .platform-section h4 {
+            color: #0369a1;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #ef4444;
+        }
+
+        .status-info {
+            background: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #0ea5e9;
+        }
+
+        .install-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 8px;
+        }
+
+        .step-number {
+            background: #0ea5e9;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content p {
+            margin: 0;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .platform-icon {
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <!-- หน้าหลัก -->
+    <div id="mainPage" class="container">
+        <div class="header">
+            <h1>สร้าง QR Code</h1>
+            <div class="header-buttons">
+                <button id="installButton" class="pwa-install-btn hidden">
+                    <div class="icon-install">
+                        <div class="phone"></div>
+                        <div class="download"></div>
+                    </div>
+                </button>
+                <button class="btn-icon" onclick="showSettings()">
+                    <div class="icon-settings">
+                        <div class="gear"></div>
+                        <div class="inner-gear"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div id="installNotice" class="install-notice">
+                💡 ติดตั้งแอพเพื่อใช้งานได้แบบออฟไลน์และประสบการณ์ที่ดีขึ้น
+                <div id="statusMessage" class="status-message status-info">
+                    กำลังตรวจสอบการติดตั้งแอพ...
+                </div>
+            </div>
+
+            <div id="emptyState" class="empty-state">
+                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <h2>ยังไม่มีธนาคารในระบบ</h2>
+                <p style="margin: 10px 0 20px;">เพิ่มธนาคารเพื่อเริ่มใช้งาน</p>
+                <button class="btn btn-primary" onclick="showSettings()">เพิ่มธนาคาร</button>
+            </div>
+            
+            <div id="mainForm" class="hidden">
+                <div class="info-notice">
+                    ✅ ข้อมูลธนาคารจะถูกบันทึกไว้โดยอัตโนมัติ
+                </div>
+                
+                <div class="form-group">
+                    <label>เลือกธนาคาร</label>
+                    <select id="bankSelect">
+                        <option value="">-- เลือกธนาคาร --</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>จำนวนเงิน (บาท)</label>
+                    <input type="number" id="amount" placeholder="0.00" step="0.01" min="0">
+                </div>
+                
+                <button class="btn btn-primary" onclick="generateQR()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    สร้าง QR Code
+                </button>
+                
+                <div id="qrResult" class="qr-container hidden">
+                    <div id="qrcode"></div>
+                    <div class="amount-display">฿ <span id="displayAmount">0.00</span></div>
+                    <button class="btn btn-success" onclick="downloadQR()">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4m4-5l5 5 5-5m-5 5V3"></path>
+                        </svg>
+                        บันทึก QR Code
+                    </button>
+                </div>
+
+                <!-- คู่มือการติดตั้งแบบ manual -->
+                <div class="manual-install">
+                    <h3>📱 คู่มือการติดตั้งแอพ</h3>
+                    <p style="color: #475569; margin-bottom: 15px; font-size: 14px;">
+                        เลือกวิธีการติดตั้งตามอุปกรณ์และเบราว์เซอร์ที่คุณใช้:
+                    </p>
+                    
+                    <div class="install-steps">
+                        <!-- Android -->
+                        <div class="platform-section">
+                            <h4>🤖 สำหรับ Android</h4>
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <p><strong>Chrome Browser:</strong></p>
+                                    <p>• แตะเมนู (⋮) มุมขวาบน</p>
+                                    <p>• เลือก <strong>"Add to Home screen"</strong></p>
+                                    <p>• กด "Add" เพื่อติดตั้ง</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <p><strong>Samsung Internet:</strong></p>
+                                    <p>• แตะเมนู (⁝) → <strong>"Add page to"</strong></p>
+                                    <p>• เลือก <strong>"Home screen"</strong></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- iPhone -->
+                        <div class="platform-section">
+                            <h4>🍎 สำหรับ iPhone/iPad</h4>
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <p><strong>Safari Browser:</strong></p>
+                                    <p>• แตะปุ่ม Share (📤) ด้านล่าง</p>
+                                    <p>• เลื่อนลงหา <strong>"Add to Home Screen"</strong></p>
+                                    <p>• กด "Add" มุมขวาบน</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <p><strong>Chrome บน iOS:</strong></p>
+                                    <p>• แตะปุ่ม Share (📤) ด้านล่าง</p>
+                                    <p>• เลือก <strong>"Add to Home Screen"</strong></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Desktop -->
+                        <div class="platform-section">
+                            <h4>💻 สำหรับคอมพิวเตอร์</h4>
+                            <div class="step">
+                                <div class="step-number">1</div>
+                                <div class="step-content">
+                                    <p><strong>Chrome/Edge:</strong></p>
+                                    <p>• ดูที่ address bar ด้านขวา</p>
+                                    <p>• คลิกไอคอน <strong>"Install"</strong> หรือ <strong>"+"</strong></p>
+                                    <p>• กด "Install" เพื่อติดตั้ง</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <div class="step-number">2</div>
+                                <div class="step-content">
+                                    <p><strong>หากไม่เห็นปุ่มติดตั้ง:</strong></p>
+                                    <p>• ไปที่ Settings → "Install"</p>
+                                    <p>• หรือใช้เมนู (⋮) → "Install"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 10px; background: #fef3c7; border-radius: 8px;">
+                        <p style="margin: 0; color: #92400e; font-size: 13px;">
+                            💡 <strong>เคล็ดลับ:</strong> หลังติดตั้งเสร็จ แอพจะปรากฏบนหน้าจอโฮมหรือในลิสต์แอพของคุณ
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- หน้าตั้งค่า -->
+    <div id="settingsPage" class="container hidden">
+        <div class="header">
+            <button class="back-btn" onclick="showMain()">
+                <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                กลับ
+            </button>
+            <h1>ตั้งค่าธนาคาร</h1>
+            <div style="width: 40px;"></div>
+        </div>
+        
+        <div class="content">
+            <div class="info-notice">
+                ✅ ข้อมูลจะถูกบันทึกไว้โดยอัตโนมัติเมื่อรีเฟรชหน้า
+            </div>
+            
+            <h2 style="margin-bottom: 15px;">ธนาคารที่บันทึกไว้ (<span id="bankCount">0</span>/5)</h2>
+            <div id="bankList" class="bank-list"></div>
+            
+            <div style="margin-top: 30px; padding-top: 30px; border-top: 2px solid #e0e0e0;">
+                <h2 style="margin-bottom: 15px;">เพิ่มธนาคารใหม่</h2>
+                <div class="form-group">
+                    <label>ชื่อธนาคาร</label>
+                    <input type="text" id="bankName" placeholder="เช่น ธนาคารกสิกรไทย">
+                </div>
+                
+                <div class="form-group">
+                    <label>เบอร์พร้อมเพย์ (10 หลัก)</label>
+                    <input type="tel" id="bankPhone" placeholder="0812345678" maxlength="10">
+                </div>
+                
+                <button class="btn btn-primary" onclick="addBank()">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    เพิ่มธนาคาร
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // จัดการข้อมูลธนาคาร
+        let banks = [];
+        let deferredPrompt;
+
+        // โหลดข้อมูลจาก localStorage
+        function loadBanks() {
+            const saved = localStorage.getItem('promptPayBanks');
+            if (saved) {
+                banks = JSON.parse(saved);
+            }
+            updateUI();
+        }
+        
+        // บันทึกข้อมูล
+        function saveBanks() {
+            localStorage.setItem('promptPayBanks', JSON.stringify(banks));
+        }
+        
+        // เพิ่มธนาคาร
+        function addBank() {
+            const name = document.getElementById('bankName').value.trim();
+            const phone = document.getElementById('bankPhone').value.trim();
+            
+            if (!name || !phone) {
+                alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+                return;
+            }
+            
+            if (phone.length !== 10 || !/^\d+$/.test(phone)) {
+                alert('เบอร์โทรศัพท์ไม่ถูกต้อง กรุณากรอก 10 หลัก');
+                return;
+            }
+            
+            if (banks.length >= 5) {
+                alert('เพิ่มธนาคารได้สูงสุด 5 ธนาคาร');
+                return;
+            }
+            
+            banks.push({
+                id: Date.now(),
+                name: name,
+                phone: phone
+            });
+            
+            saveBanks();
+            updateUI();
+            
+            document.getElementById('bankName').value = '';
+            document.getElementById('bankPhone').value = '';
+            
+            alert('เพิ่มธนาคารสำเร็จ!');
+        }
+        
+        // ลบธนาคาร
+        function deleteBank(id) {
+            if (confirm('ต้องการลบธนาคารนี้ใช่หรือไม่?')) {
+                banks = banks.filter(b => b.id !== id);
+                saveBanks();
+                updateUI();
+            }
+        }
+        
+        // อัปเดต UI
+        function updateUI() {
+            const bankList = document.getElementById('bankList');
+            const bankSelect = document.getElementById('bankSelect');
+            const bankCount = document.getElementById('bankCount');
+            
+            bankCount.textContent = banks.length;
+            
+            // อัปเดตรายการธนาคาร
+            if (banks.length === 0) {
+                bankList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">ยังไม่มีธนาคาร</p>';
+            } else {
+                bankList.innerHTML = banks.map(bank => `
+                    <div class="bank-item">
+                        <div class="bank-info">
+                            <h3>${escapeHtml(bank.name)}</h3>
+                            <p>${escapeHtml(bank.phone)}</p>
+                        </div>
+                        <button class="btn btn-danger" onclick="deleteBank(${bank.id})">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `).join('');
+            }
+            
+            // อัปเดต dropdown
+            bankSelect.innerHTML = '<option value="">-- เลือกธนาคาร --</option>';
+            banks.forEach(bank => {
+                const option = document.createElement('option');
+                option.value = bank.id;
+                option.textContent = `${bank.name} (${bank.phone})`;
+                bankSelect.appendChild(option);
+            });
+            
+            // แสดง/ซ่อนหน้าหลัก
+            if (banks.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('mainForm').classList.add('hidden');
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+                document.getElementById('mainForm').classList.remove('hidden');
+            }
+        }
+        
+        // ป้องกัน XSS
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+        
+        // สร้าง QR Code
+        function generateQR() {
+            const bankId = document.getElementById('bankSelect').value;
+            const amount = document.getElementById('amount').value;
+            
+            if (!bankId) {
+                alert('กรุณาเลือกธนาคาร');
+                return;
+            }
+            
+            if (!amount || parseFloat(amount) <= 0) {
+                alert('กรุณาระบุจำนวนเงิน');
+                return;
+            }
+            
+            const bank = banks.find(b => b.id == bankId);
+            if (!bank) return;
+            
+            // สร้างข้อมูล QR ตามมาตรฐาน PromptPay
+            const qrData = generatePromptPayQR(bank.phone, amount);
+            
+            // ล้าง QR Code เก่าทั้งหมด
+            const qrDiv = document.getElementById('qrcode');
+            qrDiv.innerHTML = '';
+            
+            // รอสักครู่ให้ DOM อัปเดต
+            setTimeout(() => {
+                // สร้าง QR Code ใหม่
+                new QRCode(qrDiv, {
+                    text: qrData,
+                    width: 256,
+                    height: 256,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                
+                // แสดงผล
+                document.getElementById('displayAmount').textContent = parseFloat(amount).toFixed(2);
+                document.getElementById('qrResult').classList.remove('hidden');
+            }, 10);
+        }
+        
+        // สร้างข้อมูล QR ตามมาตรฐาน EMVCo สำหรับ PromptPay
+        function generatePromptPayQR(phone, amount) {
+            // แปลงเบอร์โทรเป็นรูปแบบ PromptPay (0066xxxxxxxxx - 13 หลัก)
+            let formattedPhone = phone.replace(/\D/g, '');
+            if (formattedPhone.startsWith('0')) {
+                formattedPhone = '0066' + formattedPhone.substring(1);
+            } else if (formattedPhone.startsWith('66')) {
+                formattedPhone = '00' + formattedPhone;
+            } else {
+                formattedPhone = '0066' + formattedPhone;
+            }
+            
+            // สร้าง Payload Format Indicator
+            let payload = '';
+            payload += '000201'; // Payload Format Indicator
+            payload += '010212'; // Point of Initiation Method (12 = dynamic)
+            
+            // Merchant Account Information (Tag 29) - PromptPay
+            let tag29 = '';
+            tag29 += '0016'; // Application ID length
+            tag29 += 'A000000677010111'; // AID for PromptPay
+            tag29 += '01' + formattedPhone.length.toString().padStart(2, '0') + formattedPhone;
+            payload += '29' + tag29.length.toString().padStart(2, '0') + tag29;
+            
+            payload += '5303764'; // Currency Code (THB)
+            
+            // Transaction Amount
+            if (amount && parseFloat(amount) > 0) {
+                const amountStr = parseFloat(amount).toFixed(2);
+                payload += '54' + amountStr.length.toString().padStart(2, '0') + amountStr;
+            }
+            
+            payload += '5802TH'; // Country Code
+            
+            // CRC
+            payload += '6304';
+            const crcValue = crc16(payload);
+            payload += crcValue;
+            
+            return payload;
+        }
+        
+        // คำนวณ CRC16-CCITT
+        function crc16(data) {
+            let crc = 0xFFFF;
+            const polynomial = 0x1021;
+            
+            for (let i = 0; i < data.length; i++) {
+                crc ^= (data.charCodeAt(i) << 8);
+                
+                for (let j = 0; j < 8; j++) {
+                    if (crc & 0x8000) {
+                        crc = ((crc << 1) ^ polynomial) & 0xFFFF;
+                    } else {
+                        crc = (crc << 1) & 0xFFFF;
+                    }
+                }
+            }
+            
+            return crc.toString(16).toUpperCase().padStart(4, '0');
+        }
+        
+        // ดาวน์โหลด QR Code
+        function downloadQR() {
+            const canvas = document.querySelector('#qrcode canvas');
+            if (!canvas) {
+                alert('ไม่พบ QR Code');
+                return;
+            }
+            
+            const amount = document.getElementById('amount').value;
+            const link = document.createElement('a');
+            link.download = `promptpay-${amount}baht.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        
+        // สลับหน้า
+        function showSettings() {
+            document.getElementById('mainPage').classList.add('hidden');
+            document.getElementById('settingsPage').classList.remove('hidden');
+        }
+        
+        function showMain() {
+            document.getElementById('mainPage').classList.remove('hidden');
+            document.getElementById('settingsPage').classList.add('hidden');
+            document.getElementById('qrResult').classList.add('hidden');
+        }
+
+        // ฟังก์ชันตรวจสอบ PWA Support
+        function checkPWAInstallSupport() {
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // ตรวจสอบว่าเบราว์เซอร์รองรับ PWA หรือไม่
+            if (!('BeforeInstallPromptEvent' in window)) {
+                statusMessage.textContent = '📱 ใช้คู่มือการติดตั้งด้านล่าง (เบราว์เซอร์นี้ไม่รองรับการติดตั้งอัตโนมัติ)';
+                statusMessage.className = 'status-message status-info';
+                return;
+            }
+            
+            // ตรวจสอบว่าแอพถูกติดตั้งแล้วหรือไม่
+            if (window.matchMedia('(display-mode: standalone)').matches || 
+                window.navigator.standalone === true) {
+                statusMessage.textContent = '✅ แอพถูกติดตั้งแล้ว!';
+                statusMessage.className = 'status-message status-success';
+                document.getElementById('installButton').classList.add('hidden');
+                return;
+            }
+            
+            statusMessage.textContent = '👆 คลิกปุ่มติดตั้งด้านบน หรือใช้คู่มือด้านล่าง';
+            statusMessage.className = 'status-message status-info';
+        }
+
+        // PWA Installation
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = '✅ พร้อมติดตั้ง! คลิกปุ่มติดตั้งด้านบน';
+            statusMessage.className = 'status-message status-success';
+            
+            document.getElementById('installButton').classList.remove('hidden');
+        });
+
+        document.getElementById('installButton').addEventListener('click', async () => {
+            const statusMessage = document.getElementById('statusMessage');
+            
+            if (deferredPrompt) {
+                try {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    
+                    if (outcome === 'accepted') {
+                        statusMessage.textContent = '🎉 ติดตั้งแอพสำเร็จ!';
+                        statusMessage.className = 'status-message status-success';
+                        document.getElementById('installButton').classList.add('hidden');
+                    } else {
+                        statusMessage.textContent = '❌ ยกเลิกการติดตั้ง - ใช้คู่มือด้านล่างแทน';
+                        statusMessage.className = 'status-message status-error';
+                    }
+                } catch (error) {
+                    statusMessage.textContent = '❌ เกิดข้อผิดพลาด - ใช้คู่มือด้านล่างแทน';
+                    statusMessage.className = 'status-message status-error';
+                }
+                deferredPrompt = null;
+            } else {
+                statusMessage.textContent = '📱 ใช้คู่มือการติดตั้งด้านล่าง';
+                statusMessage.className = 'status-message status-info';
+            }
+        });
+
+        // ตรวจสอบว่าแอพถูกติดตั้งแล้วหรือไม่
+        window.addEventListener('appinstalled', () => {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = '🎉 ติดตั้งแอพสำเร็จ!';
+            statusMessage.className = 'status-message status-success';
+            document.getElementById('installButton').classList.add('hidden');
+        });
+
+        // ตรวจสอบการรองรับ PWA เมื่อโหลดหน้า
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBanks();
+            setTimeout(checkPWAInstallSupport, 1000);
+        });
+    </script>
+</body>
+</html>
