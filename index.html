@@ -516,6 +516,23 @@
         .platform-icon {
             font-size: 18px;
         }
+
+        .install-guide {
+            background: #e0f2fe;
+            border: 1px solid #0ea5e9;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .install-guide h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -594,8 +611,8 @@
                     </button>
                 </div>
 
-                <!-- คู่มือการติดตั้งแบบ manual -->
-                <div class="manual-install">
+                <!-- คู่มือการติดตั้งแบบ manual - แสดงตลอดเวลา -->
+                <div class="install-guide">
                     <h3>📱 คู่มือการติดตั้งแอพ</h3>
                     <p style="color: #475569; margin-bottom: 15px; font-size: 14px;">
                         เลือกวิธีการติดตั้งตามอุปกรณ์และเบราว์เซอร์ที่คุณใช้:
@@ -979,13 +996,6 @@
         function checkPWAInstallSupport() {
             const statusMessage = document.getElementById('statusMessage');
             
-            // ตรวจสอบว่าเบราว์เซอร์รองรับ PWA หรือไม่
-            if (!('BeforeInstallPromptEvent' in window)) {
-                statusMessage.textContent = '📱 ใช้คู่มือการติดตั้งด้านล่าง (เบราว์เซอร์นี้ไม่รองรับการติดตั้งอัตโนมัติ)';
-                statusMessage.className = 'status-message status-info';
-                return;
-            }
-            
             // ตรวจสอบว่าแอพถูกติดตั้งแล้วหรือไม่
             if (window.matchMedia('(display-mode: standalone)').matches || 
                 window.navigator.standalone === true) {
@@ -995,7 +1005,7 @@
                 return;
             }
             
-            statusMessage.textContent = '👆 คลิกปุ่มติดตั้งด้านบน หรือใช้คู่มือด้านล่าง';
+            statusMessage.textContent = '📱 ใช้คู่มือการติดตั้งด้านล่างเพื่อติดตั้งแอพ';
             statusMessage.className = 'status-message status-info';
         }
 
